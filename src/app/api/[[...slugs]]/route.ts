@@ -334,10 +334,10 @@ const app = new Elysia({ prefix: "/api", aot: false })
         // unwrap near
         const lastFunctionCall = transactionsRef[transactionsRef.length - 1]
           .functionCalls[0] as {
-            args: {
-              msg: string;
-            };
+          args: {
+            msg: string;
           };
+        };
         const parsedActions = JSON.parse(lastFunctionCall.args.msg);
         parsedActions["skip_unwrap_near"] = false;
         lastFunctionCall.args.msg = JSON.stringify(parsedActions);
