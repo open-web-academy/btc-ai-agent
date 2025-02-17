@@ -75,7 +75,7 @@ export async function GET() {
     },
     servers: [
       {
-        url: config?.url || process.env.AMPLIFY_DEPLOYMENT_URL,
+        url: "https://ai.hatmeme.xyz/",
       },
     ],
     "x-mb": {
