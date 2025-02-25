@@ -25,7 +25,7 @@ This API provides various endpoints related to managing auctions, transferring t
 ### Installation
 
 ```bash
-# Get key bitte
+# Get key bitte (add to .env file BITTE_API_KEY="bitte_KEY")
 https://key.bitte.ai/
 
 # Install dependencies
