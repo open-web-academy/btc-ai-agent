@@ -1,9 +1,9 @@
-import Fuse, { type IFuseOptions } from "fuse.js/dist/fuse";
+import Fuse, { type IFuseOptions } from "fuse.js";
 
 import {
   allowlistedTokens,
   type AllowlistedToken,
-} from "@/app/utils/allowlist-tokens";
+} from "@/utils/allowlist-tokens";
 
 // Create an array of tokens
 const tokens = Object.values(allowlistedTokens);
@@ -29,5 +29,5 @@ export const searchToken = (query: string): AllowlistedToken[] => {
   const result = fuse.search(query);
 
   // Map the result to only return the tokens
-  return result.map((res:any) => res.item);
+  return result.map((res) => res.item);
 };
