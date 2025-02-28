@@ -1,8 +1,24 @@
 import { swagger } from "@elysiajs/swagger";
 import { Elysia } from "elysia";
-
+import { Bitcoin as SignetBTC, BTCRpcAdapters } from 'signet.js';
+import { CONTRACT, MPC_CONTRACT, NetworkId } from "@/utils/config";
 export const maxDuration = 30;
 export const dynamic = "force-dynamic";
+import { debounce } from "@/utils/debounce";
+
+const btcRpcAdapter = new BTCRpcAdapters.Mempool('https://mempool.space/testnet4/api');
+const Bitcoin = new SignetBTC({
+  network: NetworkId,
+  contract: CONTRACT,
+  btcRpcAdapter,
+});
+
+async function deriveBitcoinAddress(account_id: string, path: string) {
+  return await Bitcoin.deriveAddressAndPublicKey(account_id, path);
+}
+
+const debouncedDeriveBitcoinAddress = debounce(deriveBitcoinAddress, 500);
+
 
 const app = new Elysia({ prefix: "/api", aot: false })
   .use(swagger())
@@ -20,15 +36,17 @@ const app = new Elysia({ prefix: "/api", aot: false })
   })
   // Método GET para obtener el balance de BTC de una cuenta
   .get("/btc_balance", async ({ query }) => {
-    const { account_id } = query;
+    const { account_id, path } = query;
 
     if (typeof account_id !== "string") {
       return { error: "account_id must be a string" };
     }
-
+  
     try {
-      const balance = await fetchBalanceFromService(account_id); // Implementa esta función según tu backend
-      return { balance };
+      const result = await debouncedDeriveBitcoinAddress(account_id,path);
+  
+      const btcBalance = await Bitcoin.getBalance(result.address);
+      return { btcBalance };
     } catch (error) {
       return { error: "Failed to fetch BTC balance" };
     }
@@ -57,41 +75,6 @@ const app = new Elysia({ prefix: "/api", aot: false })
 
 export const GET = app.handle;
 export const POST = app.handle;
-
-// Función para obtener el balance de una dirección BTC en Testnet
-async function fetchBalanceFromService(account_id: string): Promise<string> {
-  // URL de la API de Blockstream Testnet
-  const url = `https://mempool.space/testnet4/api/address/${account_id}`;
-
-  console.log(url);
-
-  // Hacer la solicitud HTTP
-  const response = await fetch(url);
-
-  // Verificar si la respuesta es exitosa
-  if (!response.ok) {
-    throw new Error(`Failed to fetch balance: ${response.statusText}`);
-  }
-
-  // Procesar la respuesta JSON
-  const data = await response.json();
-
-
-  console.log(data);
-
-  // Extraer el balance en satoshis
-  const fundedTxoSum = data.chain_stats.funded_txo_sum; // Total recibido
-  const spentTxoSum = data.chain_stats.spent_txo_sum;   // Total gastado
-  const balanceInSatoshis = fundedTxoSum - spentTxoSum; // Balance actual
-
-  // Convertir el balance de satoshis a BTC (1 BTC = 100,000,000 satoshis)
-  const balanceInBTC = balanceInSatoshis / 100000000;
-
-  console.log("balance satoshis",balanceInSatoshis)
-
-  // Devolver el balance como una cadena (puedes formatearlo si lo deseas)
-  return balanceInBTC.toString();
-}
 
 async function transferBTC(
   from_account_id: string,
