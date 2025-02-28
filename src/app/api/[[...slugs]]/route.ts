@@ -53,20 +53,26 @@ const app = new Elysia({ prefix: "/api", aot: false })
   })
   // Método POST para transferir BTC de una cuenta a otra
   .post("/btc_transfer", async ({ body }) => {
-    const { from_account_id, to_account_id, amount } = body as {
+    console.log("Request body:", body);
+
+    if (!body || typeof body !== "object") {
+      return { error: "Invalid request body" };
+  }
+  
+    const { from_account_id, to_account_id, path, amount } = body as {
+      path: string;
       from_account_id: string;
       to_account_id: string;
       amount: string;
     };
 
-    if (!from_account_id || !to_account_id || !amount) {
-      return { error: "Missing required fields: from_account_id, to_account_id, or amount" };
-    }
+    console.log("from_account_id",from_account_id);
+    console.log("path",path);
+    console.log("to_account_id",to_account_id);
+    console.log("amount",amount);
 
     try {
-      // Simulación de una llamada a una API o servicio que realiza la transferencia de BTC
-      const transaction = await transferBTC(from_account_id, to_account_id, amount); // Implementa esta función según tu backend
-      return { transaction_id: transaction.id, status: "success" };
+      return { status: "success" };
     } catch (error) {
       return { error: "Failed to transfer BTC" };
     }
@@ -75,12 +81,3 @@ const app = new Elysia({ prefix: "/api", aot: false })
 
 export const GET = app.handle;
 export const POST = app.handle;
-
-async function transferBTC(
-  from_account_id: string,
-  to_account_id: string,
-  amount: string
-): Promise<{ id: string }> {
-  // Simulación de una llamada a un servicio que realiza la transferencia de BTC
-  return { id: "tx123456789" }; // Ejemplo de ID de transacción
-}

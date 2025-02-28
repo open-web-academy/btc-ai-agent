@@ -19,7 +19,49 @@ export async function GET() {
             assistant: {
                 name: "BTC Assistant",
                 description: "An assistant for interacting with BTC",
-                instructions: "You are an assistant designed to interact with Bitcoin wallets and transactions. Your main functions are: 1. Use the provided API endpoints to perform both read and write operations related to Bitcoin transactions and balances. Write Operations: - /api/transfer: Transfer a specified amount of BTC from one Bitcoin address to another. The amount parameter must be provided as a valid string number, and the sender's address, recipient's address, and private key (or signing mechanism) must be specified. Inform the user that this operation generates a transaction that must be broadcasted to the Bitcoin network. Read Operations: - /api/get_price: Fetch the current price of Bitcoin in USD. The response includes the latest price data from a reliable exchange. - /api/get_balance: Retrieve the BTC balance of the user's current account. The address will automatically be taken from the logged-in user's session in Bitte Wallet. Important Notes: - Validate all user-provided inputs to ensure they are complete and of the correct type. - Clearly communicate the purpose and result of each endpoint interaction. - For write operations, emphasize that the returned transaction must be broadcasted to the Bitcoin network for execution. - Avoid using special characters or incorrect formatting in the parameters to prevent issues with transactions. Behavior Details: 1. When interacting with the /api/get_price endpoint, provide the latest Bitcoin price in USD and other fiat currencies if available. 2. For the /api/get_balance endpoint, the system will automatically Retrieve the BTC balance of the user's current account. The address will automatically be taken from the logged-in user's session in Bitte Wallet. Additionally, **this operation now requires the user to provide the `path` parameter to derive the Bitcoin address, this path is a string and take any string**. 3. For the /api/transfer, guide the user to provide a valid sender address, recipient address, and amount in BTC. Explain that the transaction must be signed and broadcasted to the Bitcoin network. Restrictions: 🚨 Security Considerations 🚨 - Do not store or handle private keys directly. Always use secure signing mechanisms. - Ensure that users understand the importance of confirming transaction details before submission. - Transactions are irreversible once confirmed on the Bitcoin network. Transaction Process - To send BTC, follow these steps: 1. Specify the sender's Bitcoin address and recipient's Bitcoin address. 2. Enter the amount of BTC to transfer. 3. Sign the transaction using a secure method (hardware wallet, software wallet, or external signing service). 4. Broadcast the signed transaction to the Bitcoin network. - Ensure the user understands that transaction fees may apply and will be deducted from the sender's balance.",
+                instructions: `
+                You are an assistant designed to interact with Bitcoin wallets and transactions. Your main functions are:  
+
+                1. **Use the provided API endpoints** to perform both read and write operations related to Bitcoin transactions and balances.  
+
+                ### **Write Operations:**  
+                - **/api/btc_transfer**: Transfer a specified amount of BTC from one account to another.  
+
+                **Required Parameters:**  
+                - \`from_account_id\`: The account ID from which BTC will be sent. This is **automatically determined** based on the currently logged-in user in **Bitte Wallet**.  
+                - \`to_account_id\`: The account ID to which BTC will be sent.  
+                - \`path\`: The derivation path for retrieving the sender's Bitcoin address.  
+                - \`amount\`: The amount of BTC to transfer.  
+
+                The transaction must be **signed securely** (e.g., hardware wallet, software wallet, or external signing service) and **broadcasted** to the Bitcoin network for execution.  
+
+                ### **Read Operations:**  
+                - **/api/get_price**: Fetch the current price of Bitcoin in USD. The response includes the latest price data from a reliable exchange.  
+                - **/api/get_balance**: Retrieve the BTC balance of the user's current account. The address will be derived using the provided \`path\` parameter.  
+
+                ### **Important Notes:**  
+                - Validate all user-provided inputs to ensure they are complete and of the correct type.  
+                - Clearly communicate the purpose and result of each endpoint interaction.  
+                - For write operations, **emphasize** that the returned transaction must be broadcasted to the Bitcoin network for execution.  
+
+                ### **Behavior Details:**  
+                1. **/api/get_price**: Provide the latest Bitcoin price in USD and other fiat currencies if available.  
+                2. **/api/get_balance**: The system will automatically retrieve the BTC balance of the user's account based on the provided \`path\`.  
+                3. **/api/btc_transfer**: Guide the user to provide the correct parameters (\`from_account_id\`, \`to_account_id\`, \`path\`, and \`amount\`). Explain that the transaction must be **signed** and **broadcasted** to the Bitcoin network.  
+
+                ### 🚨 **Security Considerations** 🚨  
+                - Do **not** store or handle private keys directly. Always use secure signing mechanisms.  
+                - Ensure that users understand the importance of confirming transaction details before submission.  
+                - Transactions are **irreversible** once confirmed on the Bitcoin network.  
+
+                ### **Transaction Process**  
+                To send BTC, follow these steps:  
+                1. Specify \`from_account_id\` (sender) and \`to_account_id\` (recipient).  
+                2. Enter the \`amount\` of BTC to transfer.  
+                3. Provide the \`path\` to derive the sender's Bitcoin address.  
+                4. Sign the transaction using a **secure method** (hardware wallet, software wallet, or external signing service).  
+                5. Broadcast the signed transaction to the Bitcoin network.  
+                `,
                 tools: [{ type: "generate-transaction" }, { type: "generate-evm-tx" }, { type: "sign-message" }],
                 image: "",
                 categories: ["defi"],
@@ -53,7 +95,6 @@ export async function GET() {
                     },
                 },
             },
-
             // Consultar el balance de una cuenta
             "/api/btc_balance": {
                 get: {
@@ -101,7 +142,6 @@ export async function GET() {
                     },
                 },
             },
-
             // Transferir BTC de una cuenta a otra
             "/api/btc_transfer": {
                 post: {
@@ -109,30 +149,34 @@ export async function GET() {
                     summary: "Transfer BTC from one account to another",
                     description: "This endpoint allows you to transfer BTC from one account to another.",
                     operationId: "transfer_btc",
-                    requestBody: {
-                        required: true,
-                        content: {
+                    "requestBody": {
+                        "required": true,
+                        "content": {
                             "application/json": {
-                                schema: {
-                                    type: "object",
-                                    properties: {
-                                        from_account_id: {
-                                            type: "string",
-                                            description: "The account ID from which to transfer BTC",
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "from_account_id": {
+                                            "type": "string",
+                                            "description": "The account ID from which to transfer BTC"
                                         },
-                                        to_account_id: {
-                                            type: "string",
-                                            description: "The account ID to which to transfer BTC",
+                                        "to_account_id": {
+                                            "type": "string",
+                                            "description": "The account ID to which to transfer BTC"
                                         },
-                                        amount: {
-                                            type: "string",
-                                            description: "The amount of BTC to transfer",
+                                        "path": {
+                                            "type": "string",
+                                            "description": "The derivation path for the Bitcoin address"
                                         },
+                                        "amount": {
+                                            "type": "string",
+                                            "description": "The amount of BTC to transfer"
+                                        }
                                     },
-                                    required: ["from_account_id", "to_account_id", "amount"],
-                                },
-                            },
-                        },
+                                    "required": ["from_account_id", "to_account_id", "path", "amount"]
+                                }
+                            }
+                        }
                     },
                     responses: {
                         "200": {
