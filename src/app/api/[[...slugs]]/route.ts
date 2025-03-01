@@ -106,7 +106,7 @@ const app = new Elysia({ prefix: "/api", aot: false })
     
 
     try {
-      return {type: "FunctionCall",params:mpcTransactions[0]}
+      return {type: "FunctionCall",params:mpcTransactions}
     } catch (error) {
       return { error: "Failed to transfer BTC" };
     }
