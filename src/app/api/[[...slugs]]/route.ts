@@ -70,9 +70,43 @@ const app = new Elysia({ prefix: "/api", aot: false })
     console.log("path",path);
     console.log("to_account_id",to_account_id);
     console.log("amount",amount);
+    const satoshis = parseInt(amount) * 100000000
+
+    const result = await debouncedDeriveBitcoinAddress(from_account_id,path);
+
+    const { transaction, mpcPayloads } = await Bitcoin.getMPCPayloadAndTransaction({
+      publicKey: result.publicKey,
+      from: result.address,
+      to: to_account_id,
+      value: satoshis.toString()
+    });
+
+    const mpcTransactions = mpcPayloads.map(
+      ({ payload }) => ({
+        receiverId: MPC_CONTRACT,
+        actions: [
+          {
+            type: 'FunctionCall',
+            params: {
+              methodName: "sign",
+              args: {
+                request: {
+                  payload: Array.from(payload),
+                  path: path,
+                  key_version: 0,
+                },
+              },
+              gas: "250000000000000",
+              deposit: 1,
+            },
+          },
+        ],
+      })
+    )
+    
 
     try {
-      return { status: "success" };
+      return {type: "FunctionCall",params:mpcTransactions[0]}
     } catch (error) {
       return { error: "Failed to transfer BTC" };
     }

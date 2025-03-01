@@ -61,8 +61,8 @@ importers:
         specifier: 14.2.3
         version: 14.2.3(eslint@8.0.0)(typescript@5.0.2)
       make-agent:
-        specifier: 0.2.9
-        version: 0.2.9(@types/node@20.0.0)(openapi-types@12.1.3)
+        specifier: 0.2.10-near-testnet-4a335a1
+        version: 0.2.10-near-testnet-4a335a1(@types/node@20.0.0)(openapi-types@12.1.3)
       postcss:
         specifier: ^8
         version: 8.0.0
@@ -1830,8 +1830,8 @@ packages:
   lru_map@0.4.1:
     resolution: {integrity: sha512-I+lBvqMMFfqaV8CJCISjI3wbjmwVu/VyOoU7+qtu9d7ioW5klMgsTTiUOUp+DJvfTTzKXoPbyC6YfgkNcyPSOg==}
 
-  make-agent@0.2.9:
-    resolution: {integrity: sha512-K4/en+Z2NbI88NdlXdv+7lJ+p0//Onh+lkrjm5++CdEpcBKFGZOe+F5CiuKejsfgslKlVP8bJqbcwkiwGXEt3Q==}
+  make-agent@0.2.10-near-testnet-4a335a1:
+    resolution: {integrity: sha512-6YZTRpIPHviy+sxzC80aJob2o2mJsvuoVk2Zc3EbW4u6+fvOiSCPG2ReLZYvmLzg2So/wz1X0E0luTIuxGoPZw==}
     hasBin: true
 
   math-intrinsics@1.1.0:
@@ -4936,7 +4936,7 @@ snapshots:
 
   lru_map@0.4.1: {}
 
-  make-agent@0.2.9(@types/node@20.0.0)(openapi-types@12.1.3):
+  make-agent@0.2.10-near-testnet-4a335a1(@types/node@20.0.0)(openapi-types@12.1.3):
     dependencies:
       '@apidevtools/swagger-parser': 10.1.0(openapi-types@12.1.3)
       ajv: 8.17.1

@@ -28,16 +28,37 @@ export async function GET() {
                 - **/api/btc_transfer**: Transfer a specified amount of BTC from one account to another.  
 
                 **Required Parameters:**  
-                - \`from_account_id\`: The account ID from which BTC will be sent. This is **automatically determined** based on the currently logged-in user in **Bitte Wallet**.  
+                - \`from_account_id\`: The account ID from which BTC will be sent. This will be automatically determined based on the currently logged-in user in **Bitte Wallet**.  
                 - \`to_account_id\`: The account ID to which BTC will be sent.  
-                - \`path\`: The derivation path for retrieving the sender's Bitcoin address.  
-                - \`amount\`: The amount of BTC to transfer.  
+                - \`path\`: The derivation path for retrieving the sender's Bitcoin address (e.g., "yairnava").  
+                - \`amount\`: The amount of BTC to transfer, in string format (e.g., "0.01"). 
 
-                The transaction must be **signed securely** (e.g., hardware wallet, software wallet, or external signing service) and **broadcasted** to the Bitcoin network for execution.  
+                ### **Behavior Details:**  
+                To send BTC, follow these steps:
+                1. Collect the following information from the user:  
+                - **From Account ID**: Automatically determined from the logged-in user.  
+                - **To Account ID**: Ask the user for the recipient account ID.  
+                - **Path**: Ask the user for the derivation path of the sender's Bitcoin address.  
+                - **Amount**: Ask the user for the amount of BTC to transfer.
+
+                2. Prepare the request body to send to the **/api/btc_transfer** endpoint, which should be structured as follows:
+                \`json
+                {
+                    "from_account_id": "{user_account_id}",
+                    "to_account_id": "{recipient_account_id}",
+                    "path": "{derivation_path}",
+                    "amount": "{amount}"
+                }\`
+
+                3. Shows the json to user that will be sent as in the json of the example passed.
+
+                4. The agent requests confirmation from the user before proceeding.  
+
+                5. If the user confirms, send json to transaction in the requestBody.
 
                 ### **Read Operations:**  
                 - **/api/get_price**: Fetch the current price of Bitcoin in USD. The response includes the latest price data from a reliable exchange.  
-                - **/api/get_balance**: Retrieve the BTC balance of the user's current account. The address will be derived using the provided \`path\` parameter.  
+                - **/api/get_balance**: Retrieve the BTC balance of the user's current account. Any string or value received as input will be treated as the \`path\` parameter to derive the address.
 
                 ### **Important Notes:**  
                 - Validate all user-provided inputs to ensure they are complete and of the correct type.  
@@ -46,7 +67,7 @@ export async function GET() {
 
                 ### **Behavior Details:**  
                 1. **/api/get_price**: Provide the latest Bitcoin price in USD and other fiat currencies if available.  
-                2. **/api/get_balance**: The system will automatically retrieve the BTC balance of the user's account based on the provided \`path\`.  
+                2. **/api/get_balance**: The system will automatically retrieve the BTC balance of the user's account based on the provided \`path\`, any string or value received as input will be treated as the \`path\` parameter to derive the address..  
                 3. **/api/btc_transfer**: Guide the user to provide the correct parameters (\`from_account_id\`, \`to_account_id\`, \`path\`, and \`amount\`). Explain that the transaction must be **signed** and **broadcasted** to the Bitcoin network.  
 
                 ### 🚨 **Security Considerations** 🚨  
