@@ -1,26 +1,17 @@
-# HAT Coin Agent
+# BTC Agent
 
-This API provides various endpoints related to managing auctions, transferring tokens to a vault, and retrieving token metadata from Ref.Finance. Through these endpoints, users can transfer tokens, claim a vault, start or place a bid in an auction, claim tokens from an auction, and fetch token details.
+This API provides various endpoints related to know the bitcoin price, know the bitcoin balance related to a derivation path and transfer bitcoin using chain signatures with chain abstraction. 
 
 #### Endpoints
 
-- **Token Metadata** `GET` `/api/token/{token}`
-   - Retrieves token metadata from Ref.Finance. Token identifiers can be the name, symbol, or `contractId`, and fuzzy matching will be performed automatically.
+- **BTC Price** `GET` `/api/btc_price`
+   - Retrieves the current price of Bitcoin in USD.
 
-- **Swap Transactions** `GET` `/api/swap/{tokenIn}/{tokenOut}/{quantity}`
-   - Retrieves a transaction for swapping between two tokens using the best available trading route on Ref.Finance. Token identifiers can be provided as name, symbol, or `contractId`.
+- **BTC Balance** `GET` `/api/btc_balance/{account_id}/{path}`
+   - Retrieves the BTC balance of a specified account by `account_id` and a derivation path.
 
-- **Transfer Tokens to Vault** `POST` `/api/ft_transfer_call`
-   - Transfers a specified amount of HAT tokens to a vault and increases its deposit.
-
-- **Claim Vault** `POST` `/api/claim_vault`
-   - Allows users to claim a vault by providing the vault's index.
-
-- **Start or Place Bid in Auction** `POST` `/api/start_or_place_bid`
-   - Starts a new auction or places a bid in an existing auction.
-
-- **Claim Tokens from Auction** `POST` `/api/claim_tokens`
-   - Allows users to claim their tokens from an auction.
+- **Transfer BTC from one account to another** `POST` `/api/btc_transfer`
+   - Transfers BTC from one account to another using chain signatures with chain abstraction.
 
 ### Installation
 
