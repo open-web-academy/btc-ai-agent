@@ -11,11 +11,11 @@ export async function GET() {
         },
         servers: [
             {
-                url: PLUGIN_URL,
+                url: "https://btc-agent.ow.academy",
             },
         ],
         "x-mb": {
-            "account-id": "https://main.d1eiomvewflpx4.amplifyapp.com/",
+            "account-id": ACCOUNT_ID,
             assistant: {
                 name: "BTC Assistant",
                 description: "An assistant that answers with blockchain information, tells the user's near account id, show BTC wallet address and BTC balance, creates a Bitcon txn that utilizes near chain signatures, sends signed MPC transaction on bitcoin testnet.",
