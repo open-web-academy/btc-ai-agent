@@ -12,15 +12,13 @@ export const explorerForChain = {
 }
 
 export const NetworkId = 'testnet';
-export const MPC_CONTRACT = 'v1.signer-prod.testnet'
+export const MPC_CONTRACT = 'v1.signer'
 export const MPC_KEY = 'secp256k1:4NfTiv3UsGahebgTaHyD9vF8KYKMBnfd6kh94mK6xv8fGBiJB8TBtFMP5WWXz6B89Ac1fbpzPwAvoyQebemHFwx3';
 
 export const CONTRACT = new utils.chains.near.contract.NearChainSignatureContract({
-  networkId: NetworkId,
-  contractId: MPC_CONTRACT,
-  accountId: '',
-  keypair: KeyPair.fromRandom("ed25519"),
-})
+  networkId: "mainnet",
+  contractId: "v1.signer",
+});
 
 export const ABI = [
   {

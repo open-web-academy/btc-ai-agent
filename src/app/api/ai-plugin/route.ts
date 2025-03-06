@@ -15,74 +15,67 @@ export async function GET() {
             },
         ],
         "x-mb": {
-            "account-id": ACCOUNT_ID,
+            "account-id": "https://main.d1eiomvewflpx4.amplifyapp.com/",
             assistant: {
                 name: "BTC Assistant",
-                description: "An assistant for interacting with BTC",
+                description: "An assistant that answers with blockchain information, tells the user's near account id, show BTC wallet address and BTC balance, creates a Bitcon txn that utilizes near chain signatures, sends signed MPC transaction on bitcoin testnet.",
                 instructions: `
-                You are an assistant designed to interact with Bitcoin wallets and transactions. Your main functions are:  
+                You create NEAR transactions powered by chain signatures and send them on the BTC testnet. The steps involved include generating the transaction payload, signing it with a NEAR account, and sending it to the Bitcoin testnet. Below are the detailed instructions:
 
-                1. **Use the provided API endpoints** to perform both read and write operations related to Bitcoin transactions and balances.  
+                ### **1. Generate Transaction Payload for Bitcoin Testnet**  
+                - **Endpoint**: \`/api/btc_create_mpc_txn\`  
+                - **Purpose**: Generate the payload for a Bitcoin transaction on the testnet.  
+                - **Parameters**:  
+                - \`btcReceiver\` (required): The Bitcoin Testnet address of the recipient.  
+                - \`btcAmountInSatoshi\` (required): The amount of BTC to send in satoshis.  
+                - \`account_id\` (automatic): This is taken directly from the connected Bitte wallet account.  
+                - **Validation**:  
+                - Ensure the \`btcReceiver\` and \`btcAmountInSatoshi\` are valid.
+                - If any parameter is missing or invalid, explicitly ask the user to provide it (e.g., "Please provide a valid Bitcoin address and amount to send.")  
+                - **Response**:  
+                - You will receive a payload object to be signed by the NEAR account.  
+                - **Instructions**:  
+                - Let the user know that this is the transaction payload that must be signed with their NEAR account.
 
-                ### **Write Operations:**  
-                - **/api/btc_transfer**: Transfer a specified amount of BTC from one account to another.  
+                ---
 
-                **Required Parameters:**  
-                - \`from_account_id\`: The account ID from which BTC will be sent. This will be automatically determined based on the currently logged-in user in **Bitte Wallet**.  
-                - \`to_account_id\`: The account ID to which BTC will be sent.  
-                - \`path\`: The derivation path for retrieving the sender's Bitcoin address (e.g., "yairnava").  
-                - \`amount\`: The amount of BTC to transfer, in string format (e.g., "0.01"). 
+                ### **2. Sign the Transaction Payload Using NEAR Account**  
+                - **Action**: Use the 'generate-transaction' tool to sign the received transaction payload.  
+                - **Instructions**:  
+                - Emphasize that this step requires the user to sign the payload using their NEAR account.
+                - Once the transaction is signed, it will be ready for submission to the Bitcoin testnet.
 
-                ### **Behavior Details:**  
-                To send BTC, follow these steps:
+                ---
+                ### **3. Send BTC Transaction to Testnet**  
+                - **Endpoint**: \`/api/btc_send_mpc_txn\`
+                - **Steps**:
                 1. Collect the following information from the user:  
-                - **From Account ID**: Automatically determined from the logged-in user.  
-                - **To Account ID**: Ask the user for the recipient account ID.  
-                - **Path**: Ask the user for the derivation path of the sender's Bitcoin address.  
-                - **Amount**: Ask the user for the amount of BTC to transfer.
+                    - \`txHash\` (required): The hash of the signed transaction from NEAR (Take any string).  
+                    - \`btcReceiver\` (required): Bitcoin Testnet address of the recipient.  
+                    - \`btcAmountInSatoshi\` (required): The amount of BTC to send in satoshis.  
+                    - \`account_id\` (automatic): Automatically taken from the connected Bitte wallet account.
 
-                2. Prepare the request body to send to the **/api/btc_transfer** endpoint, which should be structured as follows:
-                \`json
-                {
-                    "from_account_id": "{user_account_id}",
-                    "to_account_id": "{recipient_account_id}",
-                    "path": "{derivation_path}",
-                    "amount": "{amount}"
-                }\`
+                2. **Show Parameters to the User**:  
+                    - Display the following JSON structure to the user with the collected parameters:  
+                    \`json
+                    {
+                        "account_id": "{account_id}",
+                        "txHash": "{txHash}",
+                        "btcReceiver": "{btcReceiver}",
+                        "btcAmountInSatoshi": "{btcAmountInSatoshi}",
+                    }\`
+                    - Clearly explain each parameter to the user.
 
-                3. Shows the json to user that will be sent as in the json of the example passed.
+                3. **Request Confirmation**:  
+                    - Ask the user to confirm if the parameters are correct.  
+                    - Example: "Please confirm if the above parameters are correct. Type 'yes' to proceed or 'no' to make changes."
 
-                4. The agent requests confirmation from the user before proceeding.  
-
-                5. If the user confirms, send json to transaction in the requestBody.
-
-                ### **Read Operations:**  
-                - **/api/get_price**: Fetch the current price of Bitcoin in USD. The response includes the latest price data from a reliable exchange.  
-                - **/api/get_balance**: Retrieve the BTC balance of the user's current account. Any string or value received as input will be treated as the \`path\` parameter to derive the address.
-
-                ### **Important Notes:**  
-                - Validate all user-provided inputs to ensure they are complete and of the correct type.  
-                - Clearly communicate the purpose and result of each endpoint interaction.  
-                - For write operations, **emphasize** that the returned transaction must be broadcasted to the Bitcoin network for execution.  
-
-                ### **Behavior Details:**  
-                1. **/api/get_price**: Provide the latest Bitcoin price in USD and other fiat currencies if available.  
-                2. **/api/get_balance**: The system will automatically retrieve the BTC balance of the user's account based on the provided \`path\`, any string or value received as input will be treated as the \`path\` parameter to derive the address..  
-                3. **/api/btc_transfer**: Guide the user to provide the correct parameters (\`from_account_id\`, \`to_account_id\`, \`path\`, and \`amount\`). Explain that the transaction must be **signed** and **broadcasted** to the Bitcoin network.  
-
-                ### 🚨 **Security Considerations** 🚨  
-                - Do **not** store or handle private keys directly. Always use secure signing mechanisms.  
-                - Ensure that users understand the importance of confirming transaction details before submission.  
-                - Transactions are **irreversible** once confirmed on the Bitcoin network.  
-
-                ### **Transaction Process**  
-                To send BTC, follow these steps:  
-                1. Specify \`from_account_id\` (sender) and \`to_account_id\` (recipient).  
-                2. Enter the \`amount\` of BTC to transfer.  
-                3. Provide the \`path\` to derive the sender's Bitcoin address.  
-                4. Sign the transaction using a **secure method** (hardware wallet, software wallet, or external signing service).  
-                5. Broadcast the signed transaction to the Bitcoin network.  
+                4. **Proceed or Restart**:  
+                    - If the user confirms ("yes"), proceed to send the request to the \`/api/btc_send_mpc_txn\` endpoint.  
+                    - If the user does not confirm ("no"), restart the process and ask for the correct parameters.
                 `,
+
+
                 tools: [{ type: "generate-transaction" }, { type: "generate-evm-tx" }, { type: "sign-message" }],
                 image: "",
                 categories: ["defi"],
@@ -116,6 +109,47 @@ export async function GET() {
                     },
                 },
             },
+            // Consultar cuenta de btc derivada de Near
+            "/api/btc_account": {
+                get: {
+                    summary: "get btc account information",
+                    description: "Respond with user account ID and BTC address",
+                    operationId: "btc_account",
+                    parameters: [
+                        {
+                            name: "account_id",
+                            in: "query",
+                            description: "The NEAR account ID to generate BTC account",
+                            required: true,
+                            schema: {
+                                type: "string",
+                            },
+                        }
+                    ],
+                    responses: {
+                        "200": {
+                            description: "Successful response",
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        type: "object",
+                                        properties: {
+                                            accountId: {
+                                                type: "string",
+                                                description: "The user's NEAR address",
+                                            },
+                                            btcAddress: {
+                                                type: "string",
+                                                description: "The user's BTC address",
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
             // Consultar el balance de una cuenta
             "/api/btc_balance": {
                 get: {
@@ -132,15 +166,6 @@ export async function GET() {
                             schema: {
                                 type: "string",
                             },
-                        },
-                        {
-                            "name": "path",
-                            "in": "query",
-                            "description": "The path to be used for deriving the address",
-                            "required": true,
-                            "schema": {
-                                "type": "string"
-                            }
                         }
                     ],
                     responses: {
@@ -163,57 +188,118 @@ export async function GET() {
                     },
                 },
             },
-            // Transferir BTC de una cuenta a otra
-            "/api/btc_transfer": {
-                post: {
-                    tags: ["Bitcoin"],
-                    summary: "Transfer BTC from one account to another",
-                    description: "This endpoint allows you to transfer BTC from one account to another.",
-                    operationId: "transfer_btc",
-                    "requestBody": {
-                        "required": true,
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "from_account_id": {
-                                            "type": "string",
-                                            "description": "The account ID from which to transfer BTC"
-                                        },
-                                        "to_account_id": {
-                                            "type": "string",
-                                            "description": "The account ID to which to transfer BTC"
-                                        },
-                                        "path": {
-                                            "type": "string",
-                                            "description": "The derivation path for the Bitcoin address"
-                                        },
-                                        "amount": {
-                                            "type": "string",
-                                            "description": "The amount of BTC to transfer"
-                                        }
-                                    },
-                                    "required": ["from_account_id", "to_account_id", "path", "amount"]
-                                }
-                            }
-                        }
-                    },
+            // Crear MPC txn para envio de BTC en la red de pruebas
+            "/api/btc_create_mpc_txn": {
+                get: {
+                    operationId: "btc_create_mpc_txn",
+                    summary:
+                        "Creates a NEAR txn that utilizes near chain signatures to send transaction on bitcoin testnet",
+                    description:
+                        "Generates a NEAR transaction payload for MPC contract to send bitcoin on bitcoin test. Recieved payload from this tool can be used directly in the generate-tx tool.",
+                    parameters: [
+                        {
+                            name: "account_id",
+                            in: "query",
+                            description: "The NEAR account ID to generate BTC account",
+                            required: true,
+                            schema: {
+                                type: "string",
+                            },
+                        },
+                        {
+                            name: "btcAccountReceiver",
+                            in: "query",
+                            required: true,
+                            schema: {
+                                type: "string",
+                            },
+                            description: "The Bitcon testnet wallet address of receiver",
+                        },
+                        {
+                            name: "btcAmount",
+                            in: "query",
+                            required: true,
+                            schema: {
+                                type: "string",
+                            },
+                            description: "The amount BTC in satoshi to transfer",
+                        },
+                    ],
                     responses: {
                         "200": {
-                            description: "Successful response with the transaction details",
+                            description: "Successful response",
                             content: {
                                 "application/json": {
                                     schema: {
                                         type: "object",
                                         properties: {
-                                            transaction_id: {
-                                                type: "string",
-                                                description: "The ID of the BTC transfer transaction",
+                                            transactionPayload: {
+                                                type: "object",
+                                                properties: {
+                                                    signerId: {
+                                                        type: "string",
+                                                        description: "The signer's NEAR account ID",
+                                                    },
+                                                    receiverId: {
+                                                        type: "string",
+                                                        description: "The receiver's NEAR account ID",
+                                                    },
+                                                    actions: {
+                                                        type: "array",
+                                                        items: {
+                                                            type: "object",
+                                                            properties: {
+                                                                type: {
+                                                                    type: "string",
+                                                                    description:
+                                                                        "The type of action (e.g., 'Transfer')",
+                                                                },
+                                                                params: {
+                                                                    type: "object",
+                                                                    properties: {
+                                                                        deposit: {
+                                                                            type: "string",
+                                                                            description:
+                                                                                "The amount to transfer in yoctoNEAR",
+                                                                        },
+                                                                    },
+                                                                },
+                                                            },
+                                                        },
+                                                    },
+                                                },
                                             },
-                                            status: {
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        "400": {
+                            description: "Bad request",
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        type: "object",
+                                        properties: {
+                                            error: {
                                                 type: "string",
-                                                description: "The status of the transaction",
+                                                description: "Error message",
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        "500": {
+                            description: "Error response",
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        type: "object",
+                                        properties: {
+                                            error: {
+                                                type: "string",
+                                                description: "Error message",
                                             },
                                         },
                                     },
@@ -223,6 +309,104 @@ export async function GET() {
                     },
                 },
             },
+            // Enviar MPC txt para envio de BTC en la red de pruebas
+            "/api/btc_send_mpc_txn": {
+                get: {
+                  operationId: "btc_send_mpc_txn",
+                  summary: "Relay/Send the signed BTC testnet transaction",
+                  description:
+                    "Send signed transaction to BTC testnet. The signature is received form the txHash of the signed NEAR transaction. Other parameters are the BTC receiver address, BTC amount in satoshi, and account_id that is taken from the accoun connected to the wallet.",
+                  parameters: [
+                    {
+                        name: "account_id",
+                        in: "query",
+                        description: "The NEAR account ID connected to the wallet",
+                        required: true,
+                        schema: {
+                            type: "string",
+                        },
+                    },
+                    {
+                      name: "btcAccountReceiver",
+                      in: "query",
+                      required: true,
+                      schema: {
+                        type: "string",
+                      },
+                      description: "The BTC address of the receiver",
+                    },
+                    {
+                      name: "btcAmount",
+                      in: "query",
+                      required: true,
+                      schema: {
+                        type: "string",
+                      },
+                      description: "The amount of BTC to transfer in satoshi",
+                    },
+                    {
+                      name: "txHash",
+                      in: "query",
+                      required: true,
+                      schema: {
+                        type: "string",
+                      },
+                      description: "The txHash of the signed txn from near",
+                    },
+                  ],
+                  responses: {
+                    "200": {
+                      description: "Successful response",
+                      content: {
+                        "application/json": {
+                          schema: {
+                            type: "object",
+                            properties: {
+                              txHash: {
+                                type: "string",
+                                description:
+                                  "The txHash of the txn relayed to BTC chain :",
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                    "400": {
+                      description: "Bad request",
+                      content: {
+                        "application/json": {
+                          schema: {
+                            type: "object",
+                            properties: {
+                              error: {
+                                type: "string",
+                                description: "Error message",
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                    "500": {
+                      description: "Server error",
+                      content: {
+                        "application/json": {
+                          schema: {
+                            type: "object",
+                            properties: {
+                              error: {
+                                type: "string",
+                                description: "Error message",
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
         }
     };
 
