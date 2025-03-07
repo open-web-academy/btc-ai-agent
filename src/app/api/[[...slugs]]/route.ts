@@ -17,6 +17,7 @@ import {
   ExecutionOutcomeWithId,
   FinalExecutionOutcome,
 } from "near-api-js/lib/providers";
+import axios from "axios";
 
 const CONTRACT = new utils.chains.near.contract.NearChainSignatureContract({
   networkId: "mainnet",
@@ -44,12 +45,11 @@ const app = new Elysia({ prefix: "/api", aot: false })
   // Método para obtener el precio actual del Bitcoin
   .get("/btc_price", async () => {
     try {
-      const response = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT");
-      const data = await response.json();
-      const btcPrice = data.price;
-
-      return { btcPrice };
+      const response = await axios.get("https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT");
+      console.log(response.data);
+      return { btcPrice: response.data.price };
     } catch (error) {
+      console.error("Error fetching BTC price:", error);
       return { error: "Failed to fetch Bitcoin price" };
     }
   })
@@ -103,12 +103,30 @@ const app = new Elysia({ prefix: "/api", aot: false })
 
     const result = await debouncedDeriveBitcoinAddress(account_id,"bitcoin-1");
 
+    console.log("result",result);
+
+    console.log("btcAmount",btcAmount);
+
+
+    try{
+      const { transaction, mpcPayloads } = await Bitcoin.getMPCPayloadAndTransaction({
+        publicKey: result.publicKey,
+        from: result.address,
+        to: btcAccountReceiver,
+        value: btcAmount.toString()
+      });
+    } catch(err){
+      console.log(err);
+    }
     const { transaction, mpcPayloads } = await Bitcoin.getMPCPayloadAndTransaction({
       publicKey: result.publicKey,
       from: result.address,
       to: btcAccountReceiver,
       value: btcAmount.toString()
     });
+
+    console.log("mpcPayloads",mpcPayloads);
+
   
     const mpcTransactions = mpcPayloads.map(({ payload }) => ({
         receiverId: "v1.signer",
