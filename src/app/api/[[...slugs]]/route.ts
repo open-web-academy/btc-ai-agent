@@ -45,15 +45,9 @@ const app = new Elysia({ prefix: "/api", aot: false })
   // Método para obtener el precio actual del Bitcoin
   .get("/btc_price", async () => {
     try {
-      const response = await axios.get("https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?start=1&limit=1&convert=USD", {
-        headers: {
-          "X-CMC_PRO_API_KEY": process.env.COINMARKETCAP_API_KEY,
-          "Accept": "application/json"
-        }
-      });
-      const btcData = response.data.data[0]; // Primer elemento del array
-      const btcPrice = btcData.quote.USD.price; // Precio en USD
-      return { btcPrice: btcPrice };
+      const response = await axios.get("https://mempool.space/api/v1/prices");
+      console.log(response.data);
+      return { btcPrice: response.data.USD };
     } catch (error) {
       console.error("Failed to fetch data:", error);
     }
